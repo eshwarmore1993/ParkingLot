@@ -15,7 +15,8 @@ public class ParkingLot {
         this.parkingLotCapacity = capacity;
         this.token = 0;
     }
-    public void subscribe(ParkingLotObserver newObserver){
+
+    public void subscribe(ParkingLotObserver newObserver) {
         observers.add(newObserver);
     }
 
@@ -27,7 +28,7 @@ public class ParkingLot {
         }
         parkingMap.put(++token, car);
         if (parkingMap.size() == parkingLotCapacity) {
-            for(ParkingLotObserver observer : observers){
+            for (ParkingLotObserver observer : observers) {
                 observer.fullParkingNotification();
             }
         }
@@ -37,7 +38,14 @@ public class ParkingLot {
 
     public Car unpark(int token) {
         if (parkingMap.containsKey(token)) {
-
+            if (parkingMap.size() == parkingLotCapacity) {
+                for (ParkingLotObserver observer : observers) {
+                    if (observer instanceof ParkingLotOwner) {
+                        ParkingLotOwner owner = (ParkingLotOwner) observer;
+                        owner.parkingSlotAvailableAgainNotification();
+                    }
+                }
+            }
             return parkingMap.remove(token);
 
         }
