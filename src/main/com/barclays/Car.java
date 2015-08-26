@@ -4,6 +4,7 @@ public class Car {
     private String carNumber;
     private String carName;
 
+
     public Car(String carNumber, String carName) {
         this.carNumber = carNumber;
         this.carName = carName;
