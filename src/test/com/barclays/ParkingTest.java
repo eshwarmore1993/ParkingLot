@@ -3,13 +3,16 @@ package com.barclays;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.mockito.Mockito.mock;
+
 public class ParkingTest {
+
+    Car mockedCar = mock(Car.class);
 
     @Test
     public void shouldParkCarInParkingLot() {
         ParkingLot parkingLot = new ParkingLot(10);
-        Car car = new Car("DL-7S-BT-2883", "Honda");
-        Assert.assertTrue(parkingLot.park(car) > 0);
+        Assert.assertTrue(parkingLot.park(mockedCar) > 0);
     }
 
 
@@ -66,7 +69,7 @@ public class ParkingTest {
         parkingLot.subscribe(new ParkingLotObserver() {
             @Override
             public void fullParkingNotification() {
-                
+
             }
 
             @Override
