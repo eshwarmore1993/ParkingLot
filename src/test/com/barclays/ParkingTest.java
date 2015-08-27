@@ -3,16 +3,18 @@ package com.barclays;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 public class ParkingTest {
 
-    Car mockedCar = mock(Car.class);
+    ParkingLotOwner mockedOwner = mock(ParkingLotOwner.class);
+    SecurityPerson mockedSecurity = mock(SecurityPerson.class);
 
     @Test
     public void shouldParkCarInParkingLot() {
+        Car car = new Car("DL-7S-BT-2883", "Honda");
         ParkingLot parkingLot = new ParkingLot(10);
-        Assert.assertTrue(parkingLot.park(mockedCar) > 0);
+        Assert.assertTrue(parkingLot.park(car) > 0);
     }
 
 
@@ -43,45 +45,31 @@ public class ParkingTest {
 
     @Test
     public void shouldNotifyOwnerIfSlotIsFull() {
-        ParkingLotOwner observer = new ParkingLotOwner("Eshwar");
         ParkingLot parkingLot = new ParkingLot(1);
-        parkingLot.subscribe(observer);
+        parkingLot.subscribe(mockedOwner);
         Car car = new Car("DL-7S-BT-2883", "Honda");
         parkingLot.park(car);
-        Assert.assertTrue(observer.isParkingFull());
+        verify(mockedOwner, atLeastOnce()).fullParkingNotification();
     }
 
     @Test
     public void shouldNotNotifyOwnerIfSlotIsNotFull() {
-        ParkingLotOwner observer = new ParkingLotOwner("Eshwar");
         ParkingLot parkingLot = new ParkingLot(2);
-        parkingLot.subscribe(observer);
+        parkingLot.subscribe(mockedOwner);
         Car car = new Car("DL-7S-BT-2883", "Honda");
         parkingLot.park(car);
-        Assert.assertFalse(observer.isParkingFull());
+        verify(mockedOwner, never()).fullParkingNotification();
     }
 
     @Test
     public void shouldNotifyAllObserversIfSlotIsNotFull() {
-        ParkingLotObserver owner = new ParkingLotOwner("Eshwar");
-        ParkingLotObserver security= new SecurityPerson("sambhav");
         ParkingLot parkingLot = new ParkingLot(1);
-        parkingLot.subscribe(new ParkingLotObserver() {
-            @Override
-            public void fullParkingNotification() {
-
-            }
-
-            @Override
-            public boolean isParkingFull() {
-                return false;
-            }
-        });
-        parkingLot.subscribe(security);
+        parkingLot.subscribe(mockedSecurity);
+        parkingLot.subscribe(mockedOwner);
         Car car = new Car("DL-7S-BT-2883", "Honda");
         parkingLot.park(car);
-        Assert.assertTrue(owner.isParkingFull());
-        Assert.assertTrue(security.isParkingFull());
+        verify(mockedOwner, atLeastOnce()).fullParkingNotification();
+        verify(mockedSecurity, atLeastOnce()).fullParkingNotification();
     }
 
 }
