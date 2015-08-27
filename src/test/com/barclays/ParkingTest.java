@@ -61,7 +61,7 @@ public class ParkingTest {
         parkingLot.subscribe(mockedOwner);
         Car car = new Car("DL-7S-BT-2883", "Honda");
         parkingLot.park(car);
-        verify(mockedOwner, atLeastOnce()).fullParkingNotification();
+        verify(mockedOwner, times(1)).fullParkingNotification();
     }
 
     @Test
@@ -80,8 +80,8 @@ public class ParkingTest {
         parkingLot.subscribe(mockedOwner);
         Car car = new Car("DL-7S-BT-2883", "Honda");
         parkingLot.park(car);
-        verify(mockedOwner, atLeastOnce()).fullParkingNotification();
-        verify(mockedSecurity, atLeastOnce()).fullParkingNotification();
+        verify(mockedOwner, times(1)).fullParkingNotification();
+        verify(mockedSecurity, times(1)).fullParkingNotification();
     }
 
     @Test
@@ -91,7 +91,7 @@ public class ParkingTest {
         Car car = new Car("DL-7S-BT-2883", "Honda");
         Token token = parkingLot.park(car);
         parkingLot.unpark(token);
-        verify(mockedOwner, atLeastOnce()).parkingEmptyAgainNotification();
+        verify(mockedOwner, times(1)).parkingEmptyAgainNotification();
     }
 
 }

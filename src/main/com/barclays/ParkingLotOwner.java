@@ -1,6 +1,6 @@
 package com.barclays;
 
-public class ParkingLotOwner implements ParkingLotObserver {
+public class ParkingLotOwner implements ParkingLotAvailableObserver,ParkingLotFullObserver {
 
     private String name;
 
