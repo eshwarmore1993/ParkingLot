@@ -1,6 +1,6 @@
 package com.barclays;
 
-public class SecurityPerson implements ParkingLotFullObserver {
+public class SecurityPerson implements ParkingLotObserver {
     private String name;
     private boolean parkingIsFull = false;
 
@@ -9,10 +9,7 @@ public class SecurityPerson implements ParkingLotFullObserver {
     }
 
     @Override
-    public void fullParkingNotification() {
-        parkingIsFull = true;
+    public void sendNotification(NotificationType notification) {
+
     }
-
-
-
 }

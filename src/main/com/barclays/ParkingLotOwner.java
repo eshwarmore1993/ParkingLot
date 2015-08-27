@@ -1,6 +1,6 @@
 package com.barclays;
 
-public class ParkingLotOwner implements ParkingLotAvailableObserver,ParkingLotFullObserver {
+public class ParkingLotOwner implements ParkingLotObserver {
 
     private String name;
 
@@ -10,15 +10,9 @@ public class ParkingLotOwner implements ParkingLotAvailableObserver,ParkingLotFu
 
     private boolean parkingIsFull = false;
 
-    @Override
-    public void fullParkingNotification() {
-        parkingIsFull = true;
-    }
 
     @Override
-    public void parkingEmptyAgainNotification() {
+    public void sendNotification(NotificationType notification) {
 
     }
-
-
 }

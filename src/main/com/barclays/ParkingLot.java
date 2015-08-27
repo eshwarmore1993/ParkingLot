@@ -14,15 +14,28 @@ public class ParkingLot {
     private int parkingLotCapacity;
     private final int parkingCost = 10;
     int tokenCount;
-    List<ParkingLotObserver> observers = new ArrayList<ParkingLotObserver>();
+    Map<SubscriptionStrategy, List<ParkingLotObserver>> observers = new HashMap<SubscriptionStrategy, List<ParkingLotObserver>>();
 
     public ParkingLot(int capacity) {
         this.parkingLotCapacity = capacity;
         this.tokenCount = 0;
+        List<ParkingLotObserver> fullSubscriberList = new ArrayList<ParkingLotObserver>();
+
     }
 
-    public void subscribe(ParkingLotObserver newObserver) {
-        observers.add(newObserver);
+    public void subscribe(SubscriptionStrategy strategy, ParkingLotObserver newObserver) {
+        if (observers.containsKey(strategy)) {
+            observers.get(strategy).add(newObserver);
+        } else {
+            List<ParkingLotObserver> newStrategySubscriberList = new ArrayList<ParkingLotObserver>();
+            newStrategySubscriberList.add(newObserver);
+            observers.put(strategy, newStrategySubscriberList);
+        }
+    }
+
+    public void unsubscribe(ParkingLotAvailableObserver observer) {
+        observers.get(SubscriptionStrategy.ALL).remove(observer);
+        observers.get(SubscriptionStrategy.PARTIAL).remove(observer);
     }
 
     public Token park(Car car) {
@@ -34,12 +47,20 @@ public class ParkingLot {
         Token token = new Token(++tokenCount, parkingCost);
         parkingMap.put(token, car);
         if (parkingMap.size() == parkingLotCapacity) {
-            for (ParkingLotObserver observer : observers) {
-                observer.fullParkingNotification();
-            }
+            sendParkingFullNotification();
+
         }
         return token;
 
+    }
+
+    private void sendParkingFullNotification() {
+        for (SubscriptionStrategy strategy : observers.keySet()) {
+            List<ParkingLotObserver> allObservers = observers.get(strategy);
+            for (ParkingLotObserver observer : allObservers) {
+                observer.sendNotification(NotificationType.PARKINGFULL);
+            }
+        }
     }
 
     public Car unpark(Token token) {
@@ -52,8 +73,11 @@ public class ParkingLot {
     }
 
     private void sendParkingEmptyNotification() {
-        for (ParkingLotObserver observer : observers) {
-            observer.parkingEmptyAgainNotification();
+        List<ParkingLotObserver> fullObservers = observers.get(SubscriptionStrategy.ALL);
+        if (fullObservers != null) {
+            for (ParkingLotObserver observer : fullObservers) {
+                observer.sendNotification(NotificationType.PARKINGAVAILABLEAGAIN);
+            }
         }
     }
 }

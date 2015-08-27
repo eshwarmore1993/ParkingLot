@@ -58,40 +58,52 @@ public class ParkingTest {
     @Test
     public void shouldNotifyOwnerIfSlotIsFull() {
         ParkingLot parkingLot = new ParkingLot(1);
-        parkingLot.subscribe(mockedOwner);
+        parkingLot.subscribe(SubscriptionStrategy.ALL,mockedOwner);
         Car car = new Car("DL-7S-BT-2883", "Honda");
         parkingLot.park(car);
-        verify(mockedOwner, times(1)).fullParkingNotification();
+        verify(mockedOwner, times(1)).sendNotification(NotificationType.PARKINGFULL);
     }
 
     @Test
     public void shouldNotNotifyOwnerIfSlotIsNotFull() {
         ParkingLot parkingLot = new ParkingLot(2);
-        parkingLot.subscribe(mockedOwner);
+        parkingLot.subscribe(SubscriptionStrategy.ALL,mockedOwner);
         Car car = new Car("DL-7S-BT-2883", "Honda");
         parkingLot.park(car);
-        verify(mockedOwner, never()).fullParkingNotification();
+        verify(mockedOwner, never()).sendNotification(NotificationType.PARKINGFULL);
     }
 
     @Test
     public void shouldNotifyAllObserversIfSlotIsNotFull() {
         ParkingLot parkingLot = new ParkingLot(1);
-        parkingLot.subscribe(mockedSecurity);
-        parkingLot.subscribe(mockedOwner);
+        parkingLot.subscribe(SubscriptionStrategy.PARTIAL,mockedSecurity);
+        parkingLot.subscribe(SubscriptionStrategy.ALL, mockedOwner);
         Car car = new Car("DL-7S-BT-2883", "Honda");
         parkingLot.park(car);
-        verify(mockedOwner, times(1)).fullParkingNotification();
-        verify(mockedSecurity, times(1)).fullParkingNotification();
+        verify(mockedOwner, times(1)).sendNotification(NotificationType.PARKINGFULL);
+        verify(mockedSecurity, times(1)).sendNotification(NotificationType.PARKINGFULL);
     }
 
     @Test
     public void shouldNotifyOwnerIfParkingLotIsEmptyAgain() {
         ParkingLot parkingLot = new ParkingLot(1);
-        parkingLot.subscribe(mockedOwner);
+        parkingLot.subscribe(SubscriptionStrategy.ALL,mockedOwner);
         Car car = new Car("DL-7S-BT-2883", "Honda");
         Token token = parkingLot.park(car);
         parkingLot.unpark(token);
-        verify(mockedOwner, times(1)).parkingEmptyAgainNotification();
+        verify(mockedOwner, times(1)).sendNotification(NotificationType.PARKINGFULL);
+    }
+
+    @Test
+    public void shouldNotifyOnlyOwnerAboutNewLotAvailability(){
+        ParkingLot parkingLot = new ParkingLot(1);
+        parkingLot.subscribe(SubscriptionStrategy.ALL,mockedOwner);
+        parkingLot.subscribe(SubscriptionStrategy.PARTIAL,mockedSecurity);
+        Car car = new Car("DL-7S-BT-2883", "Honda");
+        Token token = parkingLot.park(car);
+        parkingLot.unpark(token);
+        verify(mockedOwner,times(1)).sendNotification(NotificationType.PARKINGAVAILABLEAGAIN);
+        verify(mockedSecurity, never()).sendNotification(NotificationType.PARKINGAVAILABLEAGAIN);
     }
 
 }
