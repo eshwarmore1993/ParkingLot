@@ -1,5 +1,8 @@
 package com.barclays;
 
+import com.barclays.exception.CarAlreadyParkException;
+import com.barclays.exception.CarNotPresentException;
+import com.barclays.exception.ParkingFullException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,34 +16,43 @@ public class ParkingTest {
     @Test
     public void shouldParkCarInParkingLot() {
         Car car = new Car("DL-7S-BT-2883", "Honda");
+        Token token = new Token(1, 10);
         ParkingLot parkingLot = new ParkingLot(10);
-        Assert.assertTrue(parkingLot.park(car) > 0);
+        Assert.assertEquals(token, parkingLot.park(car));
     }
 
 
-    @Test
+    @Test(expected = CarAlreadyParkException.class)
     public void shouldNotParkTheSameCarIfAlreadyInParkingLot() {
         ParkingLot parkingLot = new ParkingLot(10);
         Car car = new Car("DL-7S-BT-2883", "Honda");
         parkingLot.park(car);
-        Assert.assertTrue(parkingLot.park(car) < 0);
+        parkingLot.park(car);
     }
 
     @Test
     public void shouldUnparkTheParkedCar() {
         ParkingLot parkingLot = new ParkingLot(10);
         Car car = new Car("DL-7S-BT-2883", "Honda");
-        int token = parkingLot.park(car);
+        Token token = parkingLot.park(car);
         Assert.assertEquals(car, parkingLot.unpark(token));
     }
 
-    @Test
+    @Test(expected = CarNotPresentException.class)
     public void shouldNotUnparkANonExistingCar() {
         ParkingLot parkingLot = new ParkingLot(10);
-        Car car = new Car("DL-7S-BT-28893", "Honda");
-        int token = parkingLot.park(car);
+        Token token = new Token(1, 10);
+        parkingLot.unpark(token);
 
-        Assert.assertEquals(null, parkingLot.unpark(token + 1));
+    }
+
+    @Test(expected = ParkingFullException.class)
+    public void shouldNotParkIfParkingLotIsFull() {
+        ParkingLot parkingLot = new ParkingLot(1);
+        Car car = new Car("DL-7S-BT-2883", "Honda");
+        Car car2 = new Car("DL-7S-ST-2991", "TVS");
+        parkingLot.park(car);
+        parkingLot.park(car2);
     }
 
     @Test
@@ -70,6 +82,16 @@ public class ParkingTest {
         parkingLot.park(car);
         verify(mockedOwner, atLeastOnce()).fullParkingNotification();
         verify(mockedSecurity, atLeastOnce()).fullParkingNotification();
+    }
+
+    @Test
+    public void shouldNotifyOwnerIfParkingLotIsEmptyAgain() {
+        ParkingLot parkingLot = new ParkingLot(1);
+        parkingLot.subscribe(mockedOwner);
+        Car car = new Car("DL-7S-BT-2883", "Honda");
+        Token token = parkingLot.park(car);
+        parkingLot.unpark(token);
+        verify(mockedOwner, atLeastOnce()).parkingEmptyAgainNotification();
     }
 
 }

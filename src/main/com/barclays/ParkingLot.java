@@ -1,33 +1,40 @@
 package com.barclays;
 
+import com.barclays.exception.CarAlreadyParkException;
+import com.barclays.exception.CarNotPresentException;
+import com.barclays.exception.ParkingFullException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ParkingLot {
-    private Map<Integer, Car> parkingMap = new HashMap<Integer, Car>();
+    private Map<Token, Car> parkingMap = new HashMap<Token, Car>();
     private int parkingLotCapacity;
-    int token;
+    private final int parkingCost = 10;
+    int tokenCount;
     List<ParkingLotObserver> observers = new ArrayList<ParkingLotObserver>();
 
     public ParkingLot(int capacity) {
         this.parkingLotCapacity = capacity;
-        this.token = 0;
+        this.tokenCount = 0;
     }
-    public void subscribe(ParkingLotObserver newObserver){
+
+    public void subscribe(ParkingLotObserver newObserver) {
         observers.add(newObserver);
     }
 
-    public int park(Car car) {
+    public Token park(Car car) {
         if (parkingMap.size() >= this.parkingLotCapacity)
-            return -1;
+            throw new ParkingFullException();
         else if (parkingMap.containsValue(car)) {
-            return -1;
+            throw new CarAlreadyParkException();
         }
-        parkingMap.put(++token, car);
+        Token token = new Token(++tokenCount, parkingCost);
+        parkingMap.put(token, car);
         if (parkingMap.size() == parkingLotCapacity) {
-            for(ParkingLotObserver observer : observers){
+            for (ParkingLotObserver observer : observers) {
                 observer.fullParkingNotification();
             }
         }
@@ -35,12 +42,18 @@ public class ParkingLot {
 
     }
 
-    public Car unpark(int token) {
+    public Car unpark(Token token) {
         if (parkingMap.containsKey(token)) {
-
+            sendParkingEmptyNotification();
             return parkingMap.remove(token);
 
         }
-        return null;
+        throw new CarNotPresentException();
+    }
+
+    private void sendParkingEmptyNotification() {
+        for (ParkingLotObserver observer : observers) {
+            observer.parkingEmptyAgainNotification();
+        }
     }
 }

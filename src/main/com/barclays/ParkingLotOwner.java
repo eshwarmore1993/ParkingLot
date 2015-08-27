@@ -15,7 +15,10 @@ public class ParkingLotOwner implements ParkingLotObserver {
         parkingIsFull = true;
     }
 
-    public boolean isParkingFull() {
-        return parkingIsFull;
+    @Override
+    public void parkingEmptyAgainNotification() {
+
     }
+
+
 }
